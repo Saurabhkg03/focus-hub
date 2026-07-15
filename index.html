@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Focus Hub – Pomodoro Timer</title>
-  <meta name="description" content="A beautiful, distraction-free Pomodoro timer to boost your productivity. 25-minute focused work sessions with start, pause, and reset controls." />
+  <title>Focus Hub sakshi and saurabh – Pomodoro Timer & Tasks</title>
+  <meta name="description" content="A beautiful, distraction-free Pomodoro timer and task list to boost your productivity. 25-minute focused work sessions with task tracking." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
@@ -51,8 +51,9 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      overflow: hidden;
+      justify-content: flex-start;
+      padding: 40px 16px;
+      overflow-y: auto;
     }
 
     /* ── Ambient Background ──────────────────────────────────── */
@@ -81,7 +82,6 @@
       z-index: 1;
       width: 100%;
       max-width: 520px;
-      padding: 24px 16px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -350,6 +350,179 @@
       margin-top: 2px;
     }
 
+    /* ── To-Do List ──────────────────────────────────────────── */
+    .todo-card {
+      width: 100%;
+      background: var(--clr-glass);
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius-card);
+      padding: 32px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      backdrop-filter: blur(20px);
+      box-shadow: var(--shadow-glow), 0 24px 60px rgba(0,0,0,0.4);
+      transition: var(--transition);
+    }
+    .todo-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--clr-border);
+      padding-bottom: 12px;
+    }
+    .todo-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--clr-text-hi);
+    }
+    .todo-counter {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--clr-text-md);
+      background: rgba(255,255,255,0.06);
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+    .todo-input-row {
+      display: flex;
+      gap: 10px;
+    }
+    .todo-input {
+      flex: 1;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--clr-border);
+      border-radius: 12px;
+      padding: 12px 16px;
+      color: var(--clr-text-hi);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      outline: none;
+      transition: var(--transition);
+    }
+    .todo-input:focus {
+      border-color: var(--accent);
+      background: rgba(255,255,255,0.08);
+      box-shadow: 0 0 10px var(--accent-dim);
+    }
+    .todo-btn-add {
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 0 20px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: var(--transition);
+    }
+    .todo-btn-add:hover {
+      filter: brightness(1.1);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px var(--accent-dim);
+    }
+    .todo-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 250px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    .todo-list::-webkit-scrollbar {
+      width: 4px;
+    }
+    .todo-list::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .todo-list::-webkit-scrollbar-thumb {
+      background: var(--clr-border);
+      border-radius: 4px;
+    }
+    .todo-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.04);
+      border-radius: 12px;
+      padding: 12px 16px;
+      transition: var(--transition);
+    }
+    .todo-item:hover {
+      background: rgba(255,255,255,0.05);
+      border-color: rgba(255,255,255,0.08);
+    }
+    .todo-item-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+      cursor: pointer;
+    }
+    .todo-checkbox {
+      width: 18px; height: 18px;
+      border-radius: 6px;
+      border: 2px solid var(--clr-text-lo);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .todo-checkbox::after {
+      content: '✓';
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 900;
+      opacity: 0;
+      transition: var(--transition);
+    }
+    .todo-item.completed .todo-checkbox {
+      background: var(--accent);
+      border-color: var(--accent);
+      box-shadow: 0 0 8px var(--accent-dim);
+    }
+    .todo-item.completed .todo-checkbox::after {
+      opacity: 1;
+    }
+    .todo-text {
+      font-size: 0.9rem;
+      color: var(--clr-text-hi);
+      transition: var(--transition);
+      user-select: none;
+      word-break: break-word;
+    }
+    .todo-item.completed .todo-text {
+      color: var(--clr-text-lo);
+      text-decoration: line-through;
+    }
+    .todo-btn-delete {
+      background: transparent;
+      border: none;
+      color: var(--clr-text-lo);
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: var(--transition);
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+    .todo-btn-delete:hover {
+      color: #ff6b6b;
+      background: rgba(255,107,107,0.1);
+    }
+    .todo-empty {
+      text-align: center;
+      padding: 24px 10px;
+      color: var(--clr-text-lo);
+      font-size: 0.85rem;
+      font-style: italic;
+    }
+
     /* ── Pulse Animation (running state) ─────────────────────── */
     @keyframes pulse-ring {
       0%   { box-shadow: 0 0 0 0 var(--accent-dim); }
@@ -391,6 +564,7 @@
       .timer-display { font-size: 2.9rem; }
       .ring-wrap { width: 200px; height: 200px; }
       .timer-card { padding: 32px 20px 28px; }
+      .todo-card { padding: 24px 16px; }
     }
   </style>
 </head>
@@ -466,6 +640,21 @@
         <div class="stat-label">Breaks</div>
       </div>
     </div>
+
+    <!-- To-Do Card -->
+    <section class="todo-card" aria-label="Tasks list">
+      <div class="todo-header">
+        <h2 class="todo-title">Tasks</h2>
+        <span class="todo-counter" id="todoCounter">0/0</span>
+      </div>
+      <form class="todo-input-row" id="todoForm">
+        <input type="text" class="todo-input" id="todoInput" placeholder="What are you focusing on?" required autocomplete="off" />
+        <button type="submit" class="todo-btn-add" id="todoAddBtn">Add</button>
+      </form>
+      <ul class="todo-list" id="todoList">
+        <!-- populated by JS -->
+      </ul>
+    </section>
 
   </main>
 
@@ -672,6 +861,78 @@
     }
 
     /* ═══════════════════════════════════════════════════════════
+       TO-DO LIST LOGIC
+    ═══════════════════════════════════════════════════════════ */
+    let todoItems = JSON.parse(localStorage.getItem('focus-hub-todos') || '[]');
+
+    const todoForm = document.getElementById('todoForm');
+    const todoInput = document.getElementById('todoInput');
+    const todoList = document.getElementById('todoList');
+    const todoCounter = document.getElementById('todoCounter');
+
+    function saveTodos() {
+      localStorage.setItem('focus-hub-todos', JSON.stringify(todoItems));
+      renderTodos();
+    }
+
+    function renderTodos() {
+      todoList.innerHTML = '';
+      if (todoItems.length === 0) {
+        todoList.innerHTML = '<div class="todo-empty">No tasks added yet. Add one to stay focused!</div>';
+        todoCounter.textContent = '0/0';
+        return;
+      }
+
+      let completedCount = 0;
+      todoItems.forEach((todo, idx) => {
+        if (todo.completed) completedCount++;
+
+        const li = document.createElement('li');
+        li.className = `todo-item ${todo.completed ? 'completed' : ''}`;
+        
+        li.innerHTML = `
+          <div class="todo-item-left">
+            <div class="todo-checkbox"></div>
+            <span class="todo-text">${escapeHTML(todo.text)}</span>
+          </div>
+          <button class="todo-btn-delete" title="Delete task">×</button>
+        `;
+
+        // Toggle task completion
+        li.querySelector('.todo-item-left').addEventListener('click', () => {
+          todoItems[idx].completed = !todoItems[idx].completed;
+          saveTodos();
+        });
+
+        // Delete task
+        li.querySelector('.todo-btn-delete').addEventListener('click', (e) => {
+          e.stopPropagation();
+          todoItems.splice(idx, 1);
+          saveTodos();
+        });
+
+        todoList.appendChild(li);
+      });
+
+      todoCounter.textContent = `${completedCount}/${todoItems.length}`;
+    }
+
+    function escapeHTML(str) {
+      return str.replace(/[&<>'"]/g, 
+        tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+      );
+    }
+
+    todoForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const text = todoInput.value.trim();
+      if (!text) return;
+      todoItems.push({ text, completed: false });
+      todoInput.value = '';
+      saveTodos();
+    });
+
+    /* ═══════════════════════════════════════════════════════════
        EVENT LISTENERS
     ═══════════════════════════════════════════════════════════ */
     startPauseBtn.addEventListener('click', () => {
@@ -765,6 +1026,7 @@
     updateDisplay();
     updateDots();
     updateStats();
+    renderTodos();
   </script>
 </body>
 </html>
