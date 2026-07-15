@@ -201,7 +201,58 @@
       letter-spacing: -0.04em;
       color: var(--clr-text-hi);
       line-height: 1;
-      transition: color 0.4s ease;
+      transition: color 0.4s ease, transform 0.2s ease;
+      cursor: pointer;
+      position: relative;
+    }
+    .timer-display:hover {
+      color: var(--accent);
+      transform: scale(1.05);
+    }
+    .timer-display:hover::after {
+      content: ' ✎';
+      font-size: 1.2rem;
+      color: var(--accent);
+      vertical-align: middle;
+      margin-left: 6px;
+      opacity: 0.8;
+      display: inline-block;
+      animation: nudge 0.6s ease-in-out infinite alternate;
+    }
+    @keyframes nudge {
+      from { transform: translateX(0); }
+      to { transform: translateX(3px); }
+    }
+    .timer-input {
+      font-family: 'Outfit', sans-serif;
+      font-size: 3.2rem;
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      color: var(--clr-text-hi);
+      background: rgba(255, 255, 255, 0.05);
+      border: 2px solid var(--accent);
+      border-radius: 12px;
+      width: 140px;
+      height: 64px;
+      text-align: center;
+      outline: none;
+      box-shadow: 0 0 20px var(--accent-dim);
+      transition: var(--transition);
+      margin: 4px 0;
+    }
+    .timer-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 25px var(--accent);
+    }
+    .timer-input::-webkit-inner-spin-button,
+    .timer-input::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      appearance: none;
+      margin: 0;
+    }
+    .timer-input[type=number] {
+      -moz-appearance: textfield;
+      appearance: textfield;
     }
     .timer-label {
       font-size: 0.72rem;
@@ -552,7 +603,8 @@
           <circle class="ring-progress" cx="120" cy="120" r="104.9" id="ringProgress" />
         </svg>
         <div class="ring-inner">
-          <div class="timer-display" id="timerDisplay" aria-live="polite" aria-label="Time remaining">25:00</div>
+          <div class="timer-display" id="timerDisplay" aria-live="polite" aria-label="Time remaining" title="Click to customize time">25:00</div>
+          <input type="number" id="timerInput" class="timer-input" style="display: none;" min="1" max="999" aria-label="Set minutes">
           <div class="timer-label"   id="timerLabel">Focus Time</div>
         </div>
       </div>
@@ -633,6 +685,7 @@
        DOM REFS
     ═══════════════════════════════════════════════════════════ */
     const timerDisplay  = document.getElementById('timerDisplay');
+    const timerInput    = document.getElementById('timerInput');
     const timerLabel    = document.getElementById('timerLabel');
     const timerCard     = document.getElementById('timerCard');
     const ringProgress  = document.getElementById('ringProgress');
@@ -693,6 +746,38 @@
       toastTimer = setTimeout(() => toast.classList.remove('show'), 3200);
     }
 
+    function playAlarm() {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContext) return;
+      const ctx = new AudioContext();
+      
+      const now = ctx.currentTime;
+      const notes = [1046.50, 1318.51, 1567.98, 2093.00]; // C6, E6, G6, C7
+      notes.forEach((freq, idx) => {
+        const time = now + idx * 0.15;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        const filter = ctx.createBiquadFilter();
+        
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, time);
+        
+        gain.gain.setValueAtTime(0, time);
+        gain.gain.linearRampToValueAtTime(0.3, time + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, time + 1.2);
+        
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(2000, time);
+        
+        osc.connect(gain);
+        gain.connect(filter);
+        filter.connect(ctx.destination);
+        
+        osc.start(time);
+        osc.stop(time + 1.5);
+      });
+    }
+
     /* ═══════════════════════════════════════════════════════════
        TIMER LOGIC
     ═══════════════════════════════════════════════════════════ */
@@ -733,6 +818,7 @@
     }
 
     function onSessionEnd() {
+      playAlarm();
       if (currentMode === 'focus') {
         stats.sessions++;
         stats.focused += MODES.focus.minutes;
@@ -867,11 +953,63 @@
       btn.addEventListener('click', () => switchMode(btn.dataset.mode));
     });
 
+    // Custom Time Editing
+    timerDisplay.addEventListener('click', () => {
+      if (isRunning) {
+        pauseTimer();
+        showToast('Timer paused to edit.');
+      }
+      timerInput.value = MODES[currentMode].minutes;
+      timerDisplay.style.display = 'none';
+      timerInput.style.display = 'block';
+      timerInput.focus();
+      timerInput.select();
+    });
+
+    function saveCustomTime() {
+      if (timerInput.style.display === 'none') return;
+      let newMins = parseInt(timerInput.value, 10);
+      if (isNaN(newMins) || newMins <= 0) {
+        showToast('Please enter a valid duration.');
+        cancelEdit();
+        return;
+      }
+      if (newMins > 999) newMins = 999;
+      
+      MODES[currentMode].minutes = newMins;
+      totalSeconds = newMins * 60;
+      remainSeconds = totalSeconds;
+      
+      updateDisplay();
+      showToast(`Duration set to ${newMins} mins.`);
+      
+      timerInput.style.display = 'none';
+      timerDisplay.style.display = 'block';
+    }
+
+    function cancelEdit() {
+      if (timerInput.style.display === 'none') return;
+      timerInput.style.display = 'none';
+      timerDisplay.style.display = 'block';
+    }
+
+    timerInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        saveCustomTime();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        cancelEdit();
+      }
+    });
+
+    timerInput.addEventListener('blur', () => {
+      saveCustomTime();
+    });
+
     // Keyboard shortcuts
     document.addEventListener('keydown', e => {
-      // Don't trigger shortcuts if focus is inside input
-      if (document.activeElement === todoInput) return;
-      
+      if (document.activeElement === timerInput) return;
       if (e.code === 'Space' && e.target === document.body) {
         e.preventDefault();
         if (isRunning) { pauseTimer(); } else { startTimer(); }
